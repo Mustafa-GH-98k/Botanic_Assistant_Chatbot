@@ -1,19 +1,25 @@
+import secrets
 from flask import jsonify, request, send_file
 import logging
 from marshmallow import ValidationError
 
+from Global.authenticate_api_key import authenticate_api_key
 from Global.validate_headers import validate_headers
 from Global.Models.api_response import ApiResponse
 from chatbot.chatbot_exceptions import ServiceException
 from .chatbot_service import ChatbotService
 from .chatbot_schema import *
 
+api_keys = {"test"} ## FOR TESTING - NON PRODUCTION
+lambda: list(api_keys) 
 # TODO :
-# make an api response model
 # add authentication with a randomly generated key
 logging.basicConfig(level=logging.ERROR)
 
-
+@authenticate_api_key(
+    api_header='x-api-key',
+    valid_apikeys_getter= lambda: list(api_keys) 
+)
 def chat():
     schema = ChatRequestSchema()
 
@@ -50,6 +56,10 @@ def chat():
             error_messages=["Internal Server Error"]
         ).to_json()
 
+@authenticate_api_key(
+    api_header='x-api-key',
+    valid_apikeys_getter= lambda: list(api_keys) 
+)
 @validate_headers(
     required_headers=['imageType'],
     allowed_values={
@@ -103,3 +113,9 @@ def generateImage():
             success=False,
             error_messages=["Internal Server Error"]
         ).to_json()
+    
+
+def generateApiKey(): ## FOR TESTING - NON PRODUCTION
+    new_key = secrets.token_hex(16) 
+    api_keys.add(new_key)
+    return jsonify({"api_key": new_key})
