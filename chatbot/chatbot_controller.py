@@ -7,3 +7,4 @@ def chat():
 
 def generateImage():
     return jsonify("generate image")
+    # return send_file(img, mimetype='image/png') --> use in controller
