@@ -2,6 +2,7 @@ from flask import jsonify, request, send_file
 import logging
 from marshmallow import ValidationError
 
+from Global.Models.api_response import ApiResponse
 from chatbot.chatbot_exceptions import ServiceException
 from .chatbot_service import ChatbotService
 from .chatbot_schema import *
@@ -16,20 +17,37 @@ def chat():
     schema = ChatRequestSchema()
 
     try:
-        data = schema.load(request.json) 
+        data = schema.load(request.json)
         chatbot = ChatbotService()
         response = chatbot.chat(data["content"])
-        return jsonify({"response": response})
-    
+
+        return ApiResponse(
+            status_code=200,
+            success=True,
+            response=response
+        ).to_json()
+
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
-    
+        return ApiResponse(
+            status_code=400,
+            success=False,
+            error_messages=[e.messages] if isinstance(e.messages, dict) else e.messages
+        ).to_json()
+
     except ServiceException as e:
-        return jsonify({"error": str(e)}), e.status_code
+        return ApiResponse(
+            status_code=e.status_code,
+            success=False,
+            error_messages=[str(e)]  # Always wrap in a list
+        ).to_json()
 
     except Exception as e:
-        logging.exception("An unexpected error occurred") 
-        return jsonify({"error": "Internal Server Error"}), 500
+        logging.exception("An unexpected error occurred")  
+        return ApiResponse(
+            status_code=500,
+            success=False,
+            error_messages=["Internal Server Error"]
+        ).to_json()
 
 
 def generateImage():
@@ -40,13 +58,21 @@ def generateImage():
 
         image_type = request.headers.get("imageType")  
         if not image_type:
-            return jsonify({"error": "imageType header is required"}), 400
-        
+            return ApiResponse(
+                status_code=400,
+                success=False,
+                error_messages=["imageType header is required"],
+            ).to_json()
+
         chatbot = ChatbotService()
         response = chatbot.generate_image(data["content"], image_type)
   
         if image_type == "base64":
-            return jsonify({"base64": response})
+            return ApiResponse(
+                status_code=200,
+                success=True,
+                response={"base64": response},
+            ).to_json()
 
         if image_type == "image":
             return send_file(
@@ -57,11 +83,23 @@ def generateImage():
             )
     
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return ApiResponse(
+            status_code=400,
+            success=False,
+            error_messages=[e.messages] if isinstance(e.messages, dict) else e.messages
+        ).to_json()
     
     except ServiceException as e:
-        return jsonify({"error": str(e)}), e.status_code
+        return ApiResponse(
+            status_code=e.status_code,
+            success=False,
+            error_messages=[str(e)]
+        ).to_json()
 
     except Exception as e:
-        logging.exception("An unexpected error occurred") 
-        return jsonify({"error": "Internal Server Error"}), 500
+        logging.exception("An unexpected error occurred")
+        return ApiResponse(
+            status_code=500,
+            success=False,
+            error_messages=["Internal Server Error"]
+        ).to_json()
