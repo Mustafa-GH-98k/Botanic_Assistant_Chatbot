@@ -2,6 +2,7 @@ from flask import jsonify, request, send_file
 import logging
 from marshmallow import ValidationError
 
+from Global.validate_headers import validate_headers
 from Global.Models.api_response import ApiResponse
 from chatbot.chatbot_exceptions import ServiceException
 from .chatbot_service import ChatbotService
@@ -38,7 +39,7 @@ def chat():
         return ApiResponse(
             status_code=e.status_code,
             success=False,
-            error_messages=[str(e)]  # Always wrap in a list
+            error_messages=[str(e)]  
         ).to_json()
 
     except Exception as e:
@@ -49,7 +50,12 @@ def chat():
             error_messages=["Internal Server Error"]
         ).to_json()
 
-
+@validate_headers(
+    required_headers=['imageType'],
+    allowed_values={
+        'imageType': ['base64', 'image'],
+    }
+)
 def generateImage():
     schema = GenerateImageRequestSchema()
 
@@ -57,12 +63,6 @@ def generateImage():
         data = schema.load(request.json) 
 
         image_type = request.headers.get("imageType")  
-        if not image_type:
-            return ApiResponse(
-                status_code=400,
-                success=False,
-                error_messages=["imageType header is required"],
-            ).to_json()
 
         chatbot = ChatbotService()
         response = chatbot.generate_image(data["content"], image_type)
