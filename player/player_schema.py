@@ -1,7 +1,14 @@
-from marshmallow import Schema, fields
+from flask_restx import fields
 
-class PlayerSchema(Schema):
-    id = fields.Int(dump_only=True)
-    name = fields.Str(required=True)
-    age = fields.Int(required=True)
-    team = fields.Str(required=True)
+def get_player_model(api):
+    return api.model("Player", {
+        "id": fields.Integer(description="Player ID"),
+        "name": fields.String(required=True, description="Player Name"),
+        "score": fields.Integer(description="Player Score")
+    })
+
+def get_player_input_model(api):
+    return api.model("PlayerInput", {
+        "name": fields.String(required=True, description="Player Name"),
+        "score": fields.Integer(description="Initial Score")
+    })

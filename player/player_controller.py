@@ -1,18 +1,28 @@
 from flask import jsonify, request
 from .player_service import PlayerService
-from .player_schema import PlayerSchema
+from .player_schema import get_player_model, get_player_input_model
+from flask_restx import Resource
 
-player_schema = PlayerSchema()
-players_schema = PlayerSchema(many=True)
+def create_player_namespace(api):
+    ns = api.namespace("players", description="Player operations")
 
-def get_players():
-    players = PlayerService.get_all_players()
-    return jsonify(players_schema.dump(players))
+    player_model = get_player_model(api)
+    player_input_model = get_player_input_model(api)
 
-def create_player():
-    data = request.get_json()
-    errors = player_schema.validate(data)
-    if errors:
-        return jsonify({"errors": errors}), 400
-    new_player = PlayerService.add_player(data)
-    return jsonify(player_schema.dump(new_player)), 201
+    @ns.route("/")
+    class PlayerList(Resource):
+        @ns.doc("list_players")
+        @ns.marshal_list_with(player_model)
+        def get(self):
+            """List all players"""
+            return PlayerService.get_all_players()
+
+        @ns.doc("create_player")
+        @ns.expect(player_input_model, validate=True)
+        @ns.marshal_with(player_model, code=201)
+        def post(self):
+            """Create a new player"""
+            return PlayerService.add_player(ns.payload), 201
+
+    return ns
+

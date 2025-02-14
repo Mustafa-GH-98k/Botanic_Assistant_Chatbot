@@ -1,10 +1,10 @@
 from flask import Flask
-from player.player_routes import player_bp
+from player.player_routes import register_routes
 
 app = Flask(__name__)
 
 # Register Blueprints (services)
-app.register_blueprint(player_bp, url_prefix="/players")
+register_routes(app)
 
 @app.route('/')
 def hello_world():
