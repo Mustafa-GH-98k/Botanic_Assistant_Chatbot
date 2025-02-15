@@ -9,14 +9,14 @@ def test_hello_world(client):
 
 def test_generate_api_key(client, api_keys_fixture):
     """Test the /chatbot/generate, ApiKey endpoint."""
-    response = client.get("/chatbot/generateApiKey")  # Make a GET request
-    data = response.get_json()  # Parse the JSON response
+    response = client.get("/chatbot/generateApiKey")  
+    data = response.get_json()  
 
-    assert response.status_code == 200  # Ensure response is OK
-    assert "api_key" in data  # Ensure response contains the API key
-    assert isinstance(data["api_key"], str)  # Ensure API key is a string
-    assert len(data["api_key"]) == 32  # Ensure it's a 32-character hex string
-    assert data["api_key"] in api_keys_fixture  # Ensure API key is stored in the set
+    assert response.status_code == 200  
+    assert "api_key" in data  
+    assert isinstance(data["api_key"], str)  
+    assert len(data["api_key"]) == 32  
+    assert data["api_key"] in api_keys_fixture  
 
 
 def test_chat_success(client, api_keys_fixture):
@@ -43,7 +43,7 @@ def test_chat_missing_api_key(client):
     """Test /chatbot/chat without an API key (should return 401)."""
     response = client.post(
         "/chatbot/chat",
-        json={"content": "Hello!"},  # Valid JSON
+        json={"content": "Hello!"},  
     )
 
     assert response.status_code == 401
@@ -67,7 +67,7 @@ def test_chat_invalid_request_data(client, api_keys_fixture):
 
     response = client.post(
         "/chatbot/chat",
-        json={},  # Missing "content"
+        json={},  
         headers={"x-api-key": valid_api_key},
     )
 
