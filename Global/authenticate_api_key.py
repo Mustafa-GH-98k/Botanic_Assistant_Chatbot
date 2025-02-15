@@ -15,14 +15,14 @@ def authenticate_api_key(api_header, valid_apikeys_getter):
             
             if header_value is None:
                 return ApiResponse(
-                    status_code=400,
+                    status_code=401,
                     success=False,
                     error_messages=[f"'{api_header}' header is required"]
                 ).to_json()
 
             if header_value not in valid_apikeys_getter():
                 return ApiResponse(
-                    status_code=400,
+                    status_code=403,
                     success=False,
                     error_messages=[f"Invalid value for '{api_header}'"]
                 ).to_json()
