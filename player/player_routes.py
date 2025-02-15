@@ -1,6 +1,9 @@
-from flask_restx import Api
-from .player_controller import create_player_namespace
+from flask import Blueprint
+from .player_controller import get_players, create_player
 
-def register_routes(app):
-    api = Api(app, title="Player API", version="1.0", description="API for managing players")
-    api.add_namespace(create_player_namespace(api))
+player_bp = Blueprint("player", __name__)
+
+player_bp.route("/", methods=["GET"])(get_players)
+player_bp.route("/", methods=["POST"])(create_player)
+
+

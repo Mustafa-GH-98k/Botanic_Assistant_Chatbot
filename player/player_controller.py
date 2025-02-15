@@ -1,32 +1,52 @@
-from flask_restx import Resource, fields, Namespace
-from marshmallow import ValidationError
+from flask import jsonify, request
 from .player_service import PlayerService
-from .player_schema import player_schema, players_schema
+from .player_schema import PlayerSchema
 
-# Define the Flask-RESTx API namespace
-def create_player_namespace(api):
-    ns = api.namespace("players", description="Player operations")
+player_schema = PlayerSchema()
+players_schema = PlayerSchema(many=True)
 
-    # POST /players
-    @ns.route("/")
-    class PlayerList(Resource):
-        def get(self):
-            """Get all players"""
-            players = PlayerService.get_all_players()
-            return players_schema.dump(players)
+def get_players():
+    players = PlayerService.get_all_players()
+    return jsonify(players_schema.dump(players))
 
-        @ns.doc("create_player")
-        @ns.expect(player_schema, validate=True)  # <-- Add the Marshmallow schema to expect
-        @ns.marshal_with(player_schema, code=201)
-        def post(self):
-            """Create a new player"""
-            # Validate the incoming request data using Marshmallow
-            try:
-                data = player_schema.load(ns.payload)  # Validate incoming JSON body
-            except ValidationError as err:
-                return {"message": "Invalid data", "errors": err.messages}, 400
+def create_player():
+    """
+    Create a new player.
+    ---
+    parameters:
+      - name: player
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            age:
+              type: integer
+            team:
+              type: string
+    responses:
+      201:
+        description: Player created
+        schema:
+          $ref: '#/definitions/Player'
+    """
+    data = request.get_json()
+    errors = player_schema.validate(data)
+    if errors:
+        return jsonify({"errors": errors}), 400
+    new_player = PlayerService.add_player(data)
+    return jsonify(player_schema.dump(new_player)), 201
 
-            # Pass the validated data to your service layer
-            return PlayerService.add_player(data), 201
-
-    return ns
+swagger_definitions = {
+    'Player': {
+        'type': 'object',
+        'properties': {
+            'id': {'type': 'integer'},
+            'name': {'type': 'string'},
+            'age': {'type': 'integer'},
+            'team': {'type': 'string'}
+        }
+    }
+}
