@@ -9,13 +9,15 @@ from Global.Models.api_response import ApiResponse
 from chatbot.chatbot_exceptions import ServiceException
 from .chatbot_service import ChatbotService
 from .chatbot_schema import *
+from flasgger import swag_from
+from chatbot.chatbot_docs import *
 
 api_keys = {"test"} ## FOR TESTING - NON PRODUCTION
 lambda: list(api_keys) 
-# TODO :
-# add authentication with a randomly generated key
+
 logging.basicConfig(level=logging.ERROR)
 
+@swag_from(chat_doc)
 @authenticate_api_key(
     api_header='x-api-key',
     valid_apikeys_getter= lambda: list(api_keys) 
@@ -56,6 +58,7 @@ def chat():
             error_messages=["Internal Server Error"]
         ).to_json()
 
+@swag_from(generate_image_doc)
 @authenticate_api_key(
     api_header='x-api-key',
     valid_apikeys_getter= lambda: list(api_keys) 
@@ -114,7 +117,7 @@ def generateImage():
             error_messages=["Internal Server Error"]
         ).to_json()
     
-
+@swag_from(generate_api_key_doc)
 def generateApiKey(): ## FOR TESTING - NON PRODUCTION
     new_key = secrets.token_hex(16) 
     api_keys.add(new_key)
