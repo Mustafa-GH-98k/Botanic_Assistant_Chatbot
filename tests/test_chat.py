@@ -21,19 +21,22 @@ def test_generate_api_key(client, api_keys_fixture):
 
 def test_chat_success(client, api_keys_fixture):
     """Test /chat with valid API key and valid request."""
-    valid_api_key = client.get("/chatbot/generateApiKey").get_json()["api_key"]
-    print(api_keys_fixture)
-    response = client.post(
-        "/chatbot/chat",
-        json={"content": "Hello, chatbot!"},
-        headers={"x-api-key": valid_api_key},
-    )
 
-    data = response.get_json()
-    print(data)
-    assert response.status_code == 200
-    assert data["success"] is True
-    assert "response" in data  
+    with patch("chatbot.chatbot_service.ChatbotService.chat") as mock_generate_image:
+        mock_generate_image.return_value = "mocked chatbot response"
+
+        valid_api_key = client.get("/chatbot/generateApiKey").get_json()["api_key"]
+        print(api_keys_fixture)
+        response = client.post(
+            "/chatbot/chat",
+            json={"content": "Hello, chatbot!"},
+            headers={"x-api-key": valid_api_key},
+        )
+
+        data = response.get_json()
+        assert response.status_code == 200
+        assert data["success"] is True
+        assert "response" in data  
 
 
 def test_chat_missing_api_key(client):
