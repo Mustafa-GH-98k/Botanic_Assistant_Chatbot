@@ -5,6 +5,9 @@ from openai import OpenAI
 import requests
 from PIL import Image
 from io import BytesIO
+from google.cloud import firestore
+from langchain_google_firestore import FirestoreChatMessageHistory
+
 
 from .chatbot_exceptions import ServiceException
 
@@ -50,13 +53,21 @@ class ChatbotService :
             return img_bytes
 
 
-    def chat(self, prompt: str):
+    def chat(self, prompt: str , user_session_id:str):
             if not prompt.strip():
                 raise ServiceException("Prompt cannot be empty.", 400)
 
             try:
+                client = firestore.Client(project=os.environ["FIREBASE_PROJECT_ID"])
+                history = FirestoreChatMessageHistory(
+                    session_id=user_session_id, collection=os.environ["FIREBASE_COLLECTION_NAME"], client=client
+                )
+                history.add_user_message(prompt)
+
                 llm = ChatOpenAI()
-                response = llm.invoke(prompt)
+                response = llm.invoke(history.messages)
+                history.add_ai_message(response.content)
+
                 return response.content
             except Exception as e:
                 raise ServiceException(f"Failed to generate chat response: {str(e)}", 500) 

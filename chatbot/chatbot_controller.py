@@ -28,7 +28,7 @@ def chat():
     try:
         data = schema.load(request.json)
         chatbot = ChatbotService()
-        response = chatbot.chat(data["content"])
+        response = chatbot.chat(data["content"] , "user_session")
 
         return ApiResponse(
             status_code=200,
