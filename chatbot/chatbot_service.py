@@ -1,4 +1,5 @@
 import base64
+import logging
 import os
 from langchain_openai import ChatOpenAI
 from openai import OpenAI
@@ -7,6 +8,8 @@ from PIL import Image
 from io import BytesIO
 from google.cloud import firestore
 from langchain_google_firestore import FirestoreChatMessageHistory
+
+from chatbot.chatbot_agents import ChatbotAgentService
 
 
 from .chatbot_exceptions import ServiceException
@@ -64,13 +67,21 @@ class ChatbotService :
                 )
                 history.add_user_message(prompt)
 
-                llm = ChatOpenAI()
-                response = llm.invoke(history.messages)
-                history.add_ai_message(response.content)
+                agent_service = ChatbotAgentService()
+                llm = agent_service.create_model_with_tools()
 
-                return response.content
+                response = llm.invoke({
+                    "messages": history.messages  # Include the chat history
+                    })
+                
+                llm_response = response['messages'][-1].content
+
+                history.add_ai_message(llm_response)
+
+                return  llm_response
             except Exception as e:
-                raise ServiceException(f"Failed to generate chat response: {str(e)}", 500) 
+                logging.exception("An unexpected error occurred")
+                raise ServiceException(f"Internal Server Error", 500) 
 
 if __name__ == "__main__":
     chatbot = ChatbotService()
