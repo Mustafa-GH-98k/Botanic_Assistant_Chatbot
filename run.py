@@ -8,7 +8,7 @@ def run_streamlit():
     subprocess.run(["streamlit", "run", "frontend.py", "--server.address", "0.0.0.0"])
 
 def run_both_apps():
-    run_streamlit()
+    run_flask()
 
 if __name__ == "__main__":
     run_both_apps()
