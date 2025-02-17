@@ -37,8 +37,8 @@ class ChatbotAgentService:
         response = client.images.generate(
                     prompt=prompt,
                     n=1,
-                    # size="1024x1024"
-                    size="256x256" # reduced size to fix image analysis timeout due to imgbb being slow
+                    size="1024x1024"
+                    # size="256x256" # reduced size to fix image analysis timeout due to imgbb being slow
                 )
         
         
