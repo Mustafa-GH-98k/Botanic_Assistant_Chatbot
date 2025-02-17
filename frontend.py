@@ -1,9 +1,11 @@
 import json
+import os
 import time
 import streamlit as st
 import requests
 
-ORIGIN="http://127.0.0.1:5000"
+# ORIGIN="http://127.0.0.1:5000"
+ORIGIN = os.environ["FLASK_ORIGIN"]
 
 
 headers = {

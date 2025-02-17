@@ -1,6 +1,8 @@
+import os
 import secrets
 from flask import Flask, jsonify
 from flasgger import Swagger
+from flask_cors import CORS
 from chatbot.chatbot_routes import chatbot_bp
 from flasgger import swag_from
 
@@ -8,6 +10,7 @@ from flasgger import swag_from
 #POST : /chat  /generateImage
 
 app = Flask(__name__)
+CORS(app)  
 
 swagger = Swagger(app  )
 
@@ -33,5 +36,6 @@ def hello_world():
     return 'Hello, World!'
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
 
