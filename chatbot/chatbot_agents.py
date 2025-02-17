@@ -16,6 +16,7 @@ from langchain.agents import initialize_agent, AgentType
 from langgraph.prebuilt import create_react_agent
 from langchain.tools import StructuredTool
 from pydantic import BaseModel , HttpUrl
+from imgbb.imgbb_service import ImgbbService
 
 
 from chatbot.chatbot_exceptions import ServiceException
@@ -36,12 +37,17 @@ class ChatbotAgentService:
         response = client.images.generate(
                     prompt=prompt,
                     n=1,
-                    size="1024x1024"
+                    # size="1024x1024"
+                    size="256x256" # reduced size to fix image analysis timeout due to imgbb being slow
                 )
         
         
         image_url = response.data[0].url
-        return image_url
+
+        imgbb_service = ImgbbService()
+        stored_img_url = imgbb_service.upload_to_imgbb(image_url)
+
+        return stored_img_url
 
     def image_analysis_agent(self , prompt:str , url : HttpUrl):
         client = OpenAI()
