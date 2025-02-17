@@ -85,6 +85,7 @@ class ChatbotService :
                 logging.exception("An unexpected error occurred")
                 raise ServiceException(f"Internal Server Error", 500) 
 
+
 def generate_prompt_template(history):
     context = """
     You are a chatbot that helps users by providing information and generating images based on their requests. 
@@ -102,44 +103,29 @@ def generate_prompt_template(history):
 
     examplars = """
         Example 1:
-        Input:
-        {{
-            "user_query": "What’s the capital of France?"
-        }}
+        Input: What’s the capital of France?  
 
-        Output:
-        - **Response**: The capital of France is Paris.
+        Output: The capital of France is Paris.  
 
         Example 2:
-        Input:
-        {{
-            "user_query": "Can you generate an image of a sunset?"
-        }}
+        Input: Can you generate an image of a sunset?  
 
-        Output:
-        {{
-            "image_url": "https://example.com/generated-sunset.jpg",
-            "response": "Here is the image of the sunset you requested."
-        }}
+        Output:  
+        {{  
+            "image_url": "https://example.com/generated-sunset.jpg",  
+            "response": "Here is the image of the sunset you requested."  
+        }}  
 
         Example 3:
-        Input:
-        {{
-            "user_query": "What is the image about?"
-        }}
+        Input: What is the image about?  
 
-        Output:
-        - **Response**: This image was generated to showcase a beautiful sunset, created based on your earlier request.
+        Output: This image was generated to showcase a beautiful sunset, created based on your earlier request.  
 
         Example 4:
-        Input:
-        {{
-            "user_query": "Can you show the sunset image again?"
-        }}
+        Input: Can you show the sunset image again?  
 
-        Output:
-        - **Response**: Here is the sunset image you requested: [https://example.com/generated-sunset.jpg].
-        """
+        Output: Here is the sunset image you requested: [https://example.com/generated-sunset.jpg].  
+"""
 
 
     instructions = """
@@ -166,6 +152,8 @@ def generate_prompt_template(history):
     )
 
     return prompt_template
+
+
 
 if __name__ == "__main__":
     chatbot = ChatbotService()

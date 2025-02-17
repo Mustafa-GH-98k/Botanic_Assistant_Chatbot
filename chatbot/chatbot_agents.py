@@ -38,7 +38,6 @@ class ChatbotAgentService:
                     prompt=prompt,
                     n=1,
                     size="1024x1024"
-                    # size="256x256" # reduced size to fix image analysis timeout due to imgbb being slow
                 )
         
         
@@ -49,11 +48,33 @@ class ChatbotAgentService:
 
         return stored_img_url
 
-    def image_analysis_agent(self , prompt:str , url : HttpUrl):
+    def image_analysis_agent(self, prompt: str, url: HttpUrl):
         client = OpenAI()
         url = str(url)
 
-        response = client.chat.completions.create(
+
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            return f"Error downloading image: {e}"
+
+
+        try:
+            image = Image.open(BytesIO(response.content))
+        except Exception as e:
+            return f"Error opening image: {e}"
+
+
+        image.thumbnail((512, 512))  # Adjust size as needed
+
+
+        buffered = BytesIO()
+        image.save(buffered, format="JPEG")  # Save in a compressed format
+        img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+
+        openai_response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {
@@ -63,7 +84,7 @@ class ChatbotAgentService:
                         {
                             "type": "image_url",
                             "image_url": {
-                                "url": url,
+                                "url": f"data:image/jpeg;base64,{img_base64}",
                             },
                         },
                     ],
@@ -71,7 +92,8 @@ class ChatbotAgentService:
             ],
             max_tokens=300,
         )
-        image_description = response.choices[0].message.content
+
+        image_description = openai_response.choices[0].message.content
         return image_description
 
     def create_model_with_tools(self):
