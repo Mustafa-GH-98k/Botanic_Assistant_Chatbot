@@ -20,6 +20,7 @@ from imgbb.imgbb_service import ImgbbService
 
 
 from chatbot.chatbot_exceptions import ServiceException
+from supabase_.supabase_service import SupabaseService
 
 class ImageAnalysisInput(BaseModel):
     prompt: str
@@ -43,8 +44,8 @@ class ChatbotAgentService:
         
         image_url = response.data[0].url
 
-        imgbb_service = ImgbbService()
-        stored_img_url = imgbb_service.upload_to_imgbb(image_url)
+        supabase_service = SupabaseService()
+        stored_img_url = supabase_service.upload_to_supabase(image_url)
 
         return stored_img_url
 
