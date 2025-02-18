@@ -98,7 +98,7 @@ class ChatbotAgentService:
         return image_description
 
     def create_model_with_tools(self):
-        llm = ChatOpenAI()
+        llm = ChatOpenAI(model="gpt-4-turbo")
 
 
         image_tool = StructuredTool.from_function(
