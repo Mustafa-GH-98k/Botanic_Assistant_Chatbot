@@ -1,10 +1,28 @@
 import os
 import secrets
+import tempfile
 from flask import Flask, jsonify
 from flasgger import Swagger
 from flask_cors import CORS
 from chatbot.chatbot_routes import chatbot_bp
 from flasgger import swag_from
+
+gcloud_json_file_path = os.environ["GCOULD_TEXT_CREDENTIALS_PATH"]
+
+if os.path.exists(gcloud_json_file_path):
+    
+    with open(gcloud_json_file_path, "r") as file:
+        gcloud_json_str = file.read()
+
+    
+    temp_json_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+    with open(temp_json_file.name, "w") as temp_file:
+        temp_file.write(gcloud_json_str)
+
+    
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_json_file.name
+else:
+    raise ValueError("Google Cloud credentials file not found!")
 
 # GET : /
 #POST : /chat  /generateImage
