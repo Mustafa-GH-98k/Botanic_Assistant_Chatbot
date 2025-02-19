@@ -1,0 +1,9 @@
+[server]
+headless = true
+enableWebsocketCompression = true
+
+[theme]
+base="dark"
+font="monospace"
+
+
