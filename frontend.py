@@ -4,6 +4,14 @@ import time
 import streamlit as st
 import requests
 
+st.set_page_config(
+    page_title="Botanic",  # Title displayed in the browser tab
+    page_icon="💬",  # Icon displayed in the browser tab
+    layout="centered",  # Options: "centered" or "wide"
+    initial_sidebar_state="expanded"  # Options: "auto", "expanded", or "collapsed"
+)
+
+
 # ORIGIN="http://127.0.0.1:5000"
 ORIGIN = os.environ["FLASK_ORIGIN"]
 
@@ -58,7 +66,7 @@ def display_response(response:requests.Response):
 
 
 
-st.title("Hello, Streamlit! 🎈")
+st.title("Botanic")
 
 
 if "messages" not in st.session_state:
