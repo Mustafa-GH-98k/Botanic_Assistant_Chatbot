@@ -1,7 +1,7 @@
 import os
 import requests
 
-from imgbb.imgbb_exceptions import ServiceException
+from Models.service_exception import ServiceException
 
 class ImgbbService:
     IMGBB_API_KEY = os.getenv("IMGBB_API_KEY") 

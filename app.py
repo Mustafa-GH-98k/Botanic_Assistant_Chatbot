@@ -3,7 +3,7 @@ import secrets
 from flask import Flask, jsonify
 from flasgger import Swagger
 from flask_cors import CORS
-from chatbot.chatbot_routes import chatbot_bp
+from Routes.chatbot_routes import chatbot_bp
 from flasgger import swag_from
 
 # GET : /
@@ -37,5 +37,5 @@ def hello_world():
 
 if __name__ == "__main__":
     # app.run(debug=True)
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=False , host='0.0.0.0', port=int(os.environ.get("PORT", 5000) ))
 

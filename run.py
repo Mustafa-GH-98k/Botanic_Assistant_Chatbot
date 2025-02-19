@@ -6,9 +6,9 @@ import sys
 processes = []
 
 def run_flask():
-    flask_process = subprocess.Popen(["flask", "run", "--port", "5000"])
-    processes.append(flask_process)
-    flask_process.wait()
+    gunicorn_process = subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "300", "app:app"])
+    processes.append(gunicorn_process)
+    gunicorn_process.wait()
 
 def run_streamlit():
     streamlit_process = subprocess.Popen(["streamlit", "run", "frontend.py"])

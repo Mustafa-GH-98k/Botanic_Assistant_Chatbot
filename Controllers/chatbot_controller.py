@@ -3,14 +3,15 @@ from flask import jsonify, request, send_file
 import logging
 from marshmallow import ValidationError
 
-from Global.authenticate_api_key import authenticate_api_key
-from Global.validate_headers import validate_headers
-from Global.Models.api_response import ApiResponse
-from chatbot.chatbot_exceptions import ServiceException
-from .chatbot_service import ChatbotService
-from .chatbot_schema import *
+from Middleware.authenticate_api_key import authenticate_api_key
+from Middleware.validate_headers import validate_headers
+from Models.api_response import ApiResponse
+from Models.service_exception import ServiceException
+from Services.chatbot_service import ChatbotService
+from Middleware.chatbot_schema import *
 from flasgger import swag_from
-from chatbot.chatbot_docs import *
+from Config.swagger_docs import *
+
 
 api_keys = {"test"} ## FOR TESTING - NON PRODUCTION
 lambda: list(api_keys) 

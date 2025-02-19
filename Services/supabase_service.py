@@ -2,11 +2,7 @@ import os
 import uuid
 import requests
 from supabase import create_client, Client
-from supabase_.supabase_exceptions import *
-
-def print_magenta(text):
-
-    print("\033[35m" + str(text) + "\033[0m")
+from Models.service_exception import *
 
 class SupabaseService:
     def __init__(self):
@@ -29,7 +25,7 @@ class SupabaseService:
             self.supabase.storage.from_(bucket_name).upload(file_name, image_bytes, file_options={"content-type": "image/jpeg"})
 
             file_url = self.supabase.storage.from_(bucket_name).get_public_url(file_name)
-            print("image public link is " + file_url)
+
             return file_url
 
         except requests.exceptions.RequestException as e:

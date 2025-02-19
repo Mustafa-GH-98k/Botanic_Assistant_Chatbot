@@ -4,17 +4,24 @@ import os
 from langchain_openai import ChatOpenAI
 from openai import OpenAI
 import requests
-from PIL import Image
 from io import BytesIO
 from google.cloud import firestore
 from langchain_google_firestore import FirestoreChatMessageHistory
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts import MessagesPlaceholder
 
-from chatbot.chatbot_agents import ChatbotAgentService
+from langgraph.prebuilt import create_react_agent
+from langchain.tools import StructuredTool
 
 
-from .chatbot_exceptions import ServiceException
+from Agents.image_generation_agent import ImageGenerationInput
+from Models.service_exception import ServiceException
+
+from Agents.image_generation_agent import image_generation_agent
+from Agents.image_analysis_agent import ImageAnalysisInput, image_analysis_agent
+
+
+from Models.service_exception import ServiceException
 
 class ChatbotService :
     client : OpenAI
@@ -22,6 +29,35 @@ class ChatbotService :
 
     def __init__(self):
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+
+    
+
+    def create_model_with_tools(self):
+        # llm = ChatOpenAI(model="gpt-4-turbo")
+        llm = ChatOpenAI()
+
+
+        image_tool = StructuredTool.from_function(
+            func=image_generation_agent,
+            name="image_generator",
+            description="Generate an image from a given prompt using AI.",
+            args_schema=ImageGenerationInput
+        )
+
+        image_analysis_tool = StructuredTool.from_function(
+            func=image_analysis_agent,
+            args_schema=ImageAnalysisInput,
+            name="image_analyzer",
+            description="Analyze an image by providing both a prompt and an image URL." 
+        )
+
+        agent = create_react_agent(
+            model=llm, 
+            tools=[image_tool, image_analysis_tool]
+        )
+
+        return agent
+
     
     def generate_image(self, prompt: str, imageType: str):
         if imageType not in self.image_options:
@@ -69,8 +105,7 @@ class ChatbotService :
                 )
                 history.add_user_message(prompt)
 
-                agent_service = ChatbotAgentService()
-                llm = agent_service.create_model_with_tools()
+                llm = self.create_model_with_tools()
                 prompt_template= generate_prompt_template(history)
 
                 chain = prompt_template | llm
@@ -156,6 +191,7 @@ def generate_prompt_template(history):
 
 
 if __name__ == "__main__":
-    chatbot = ChatbotService()
-    r = chatbot.generate_image("beriut lebanon" , "base6")
-    print(r)
+    pass
+    # chatbot = ChatbotService()
+    # r = chatbot.generate_image("beriut lebanon" , "base6")
+    # print(r)

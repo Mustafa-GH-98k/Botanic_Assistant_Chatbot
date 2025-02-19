@@ -1,6 +1,6 @@
 from flask import jsonify
 
-from Global.static import API_VERSION
+from Config.constants import API_VERSION
 
 class ApiResponse:
     def __init__(self, status_code: int, success: bool, response=None, error_messages=None, version=API_VERSION):

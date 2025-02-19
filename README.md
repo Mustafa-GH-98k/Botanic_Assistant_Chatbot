@@ -79,7 +79,7 @@ Make sure you have the following installed:
 
 5. Start the application
    ```bash
-        python app.py
+        python run.py
     ```
 
 6. [Bonus Addon Environment Variables](#requirements)

@@ -1,10 +1,10 @@
 from functools import wraps
 from flask import request, jsonify
 
-from Global.Models.api_response import ApiResponse
+from Models.api_response import ApiResponse
 
 from flask import request
-from Global.static import API_VERSION 
+from Config.constants import API_VERSION 
 
 def validate_headers(required_headers, allowed_values):
     def decorator(f):
