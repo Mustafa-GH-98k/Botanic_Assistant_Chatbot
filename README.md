@@ -29,6 +29,9 @@ Made using Python and Flask
 - [Day 1](#day-1)
 - [Day 2](#day-2)
 8. [Bonus](#bonus)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Hosted Version](#hosted-verison)
 
 
 # Running the app
@@ -52,16 +55,16 @@ Make sure you have the following installed:
 
 2. **Create a Python virtual environment:**
    ```bash
-   python -m venv venv
+        python -m venv venv
    ```
 
    - **For Windows:**
      ```bash
-     venv\Scripts\activate
+         venv\Scripts\activate
      ```
    - **For macOS/Linux:**
      ```bash
-     source venv/bin/activate
+        source venv/bin/activate
      ```
 
 3. Install the required dependencies:
@@ -79,11 +82,13 @@ Make sure you have the following installed:
         python app.py
     ```
 
+6. [Bonus Addon Environment Variables](#requirements)
+
 
 # Interacting with the app
 
 ### Postman
-You can use this [postman collection](#) to interact with the app
+You can use this [postman collection](https://github.com/user-attachments/files/18871080/itxi_flask_assigment.postman_collection.json) to interact with the app
 
 ### Swagger
 In the browser navigate to http://127.0.0.1:5000/apidocs/
@@ -250,4 +255,45 @@ Taking a look at the commit history using 'git --no-pager log' / github
 | **End**    | swagger docs complete         | 2:50 PM   | c46d562ae80d3c62a0d190b68156b14601d361f0        |
 
 # Bonus
-Bonus rounds incoming soon
+### Features
+1. Message History : langchain , firestore
+2. Image Gen & Analysis : langchain , langsmith, agents (tried bind_tools , initialize_agent , create_react_agent + StructuredTool)
+3. Generated Image Storage : tried imgbb , imgur ,  supabase 
+4. Image Generation Awareness : langchain , langsmith , ChatPromptTemplate
+5. Chatbot UI : streamlit
+6. Image analysis optimization : pillow
+7. Deployment : gcloud , render , gunicorn 
+
+### Requirements
+If you want to just try only the api with no bonus features go to commit cd36081d21de6cc6e6fb32562eff280ee926d6ae and just run the app.py as specified before
+
+To use the bonus features locally , you need to setup additional `services` & add more `environment variables` to the `.env` file pr you can try them on the [hosted version](#hosted-verison)
+
+- Flask orign that the front end will use , locally the value would be the local host url
+     ```bash
+        FLASK_ORIGIN ="http://localhost:5000"
+    ```
+- Generate a Gcloud service acount json key file and set the variable to the json file path , with the firebase project id and firestore collection name 
+    ```bash
+        GOOGLE_APPLICATION_CREDENTIALS="./gcloud.json"
+        FIREBASE_PROJECT_ID = "project_id"
+        FIREBASE_COLLECTION_NAME = "chat_history"
+    ```
+- Create a supabase storage public bucker , add an allow-create policy for the service and set these environment vartiables 
+    ```bash
+        SUPABASE_URL= "url"
+        SUPABASE_ANON_KEY= "anon_key"
+
+    ```
+- OPTIONAL : for monnitoring the llm reasoning you can set langsmith environment varibales
+    ```bash
+        LANGSMITH_TRACING=true
+        LANGSMITH_ENDPOINT="endpoint"
+        LANGSMITH_API_KEY="api_key"
+        LANGSMITH_PROJECT="project_name"
+
+    ```
+
+### Hosted verison
+- [Frontend](https://frontend-itxi-flask-chatbot-assignment.onrender.com)
+- [Backend](https://backend-itxi-flask-chatbot-assignment.onrender.com)

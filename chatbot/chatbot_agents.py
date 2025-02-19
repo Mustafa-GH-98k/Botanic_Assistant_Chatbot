@@ -76,7 +76,6 @@ class ChatbotAgentService:
 
 
         openai_response = client.chat.completions.create(
-            model="gpt-4o-mini",
             messages=[
                 {
                     "role": "user",
