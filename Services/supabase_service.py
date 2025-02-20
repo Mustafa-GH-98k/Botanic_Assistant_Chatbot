@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 import requests
@@ -58,5 +59,6 @@ class SupabaseService:
             raise ServiceException(f"Service error: {str(e)}", status_code=e.status_code)
 
         except Exception as e:
-            raise ServiceException(f"Internal Server Error: {str(e)}", status_code=500)
+            logging.exception("An unexpected error occurred")
+            raise ServiceException(f"Internal Server Error", status_code=500)
 
