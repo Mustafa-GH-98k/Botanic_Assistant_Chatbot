@@ -6,19 +6,42 @@ from Models.service_exception import *
 
 class SupabaseService:
     def __init__(self):
-        self.SUPABASE_URL = os.environ["SUPABASE_URL"]  
-        self.SUPABASE_KEY = os.environ["SUPABASE_ANON_KEY"]  
+        """
+        Initialize the Supabase client with the Supabase URL and the anon key.
+
+        Example:
+            SupabaseService()
+        """
+        self.SUPABASE_URL = os.environ["SUPABASE_URL"]
+        self.SUPABASE_KEY = os.environ["SUPABASE_ANON_KEY"]
         self.supabase: Client = create_client(self.SUPABASE_URL, self.SUPABASE_KEY)
 
     def upload_to_supabase(self, image_url, bucket_name="images_generated"):
+        """
+        Upload an image to Supabase.
+
+        Args:
+            image_url (str): The URL of the image.
+            bucket_name (str): The name of the Supabase bucket to upload to.
+
+        Returns:
+            str: The URL of the uploaded image.
+
+        Raises:
+            ServiceException: If an exception occurs while fetching the image or uploading to Supabase.
+
+        Example:
+            supabase_service = SupabaseService()
+            image_url = supabase_service.upload_to_supabase("https://example.com/image.jpg")
+            print(image_url)
+        """
         try:
 
             fetch_response = requests.get(image_url)
             if fetch_response.status_code != 200:
                 raise Exception(f"Error fetching image from URL: {fetch_response.text}")
 
-
-            image_bytes = fetch_response.content  
+            image_bytes = fetch_response.content
 
             file_name = f"gen_{uuid.uuid4().hex}.png"
 
@@ -36,3 +59,4 @@ class SupabaseService:
 
         except Exception as e:
             raise ServiceException(f"Internal Server Error: {str(e)}", status_code=500)
+
