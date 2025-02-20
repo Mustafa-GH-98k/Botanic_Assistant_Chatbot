@@ -88,7 +88,7 @@ Make sure you have the following installed:
 # Interacting with the app
 
 ### Postman
-You can use this [postman collection](https://github.com/user-attachments/files/18871080/itxi_flask_assigment.postman_collection.json) to interact with the app
+You can use this [postman collection](https://github.com/user-attachments/files/18877701/itxi_flask_assigment.postman_collection.json) to interact with the app
 
 ### Swagger
 In the browser navigate to http://127.0.0.1:5000/apidocs/
