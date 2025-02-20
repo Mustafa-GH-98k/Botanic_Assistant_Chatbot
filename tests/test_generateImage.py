@@ -9,7 +9,7 @@ def test_generate_image_base64_success(client, api_keys_fixture):
     """Test /generateImage with valid API key and base64 image type."""
 
     
-    with patch("chatbot.chatbot_service.ChatbotService.generate_image") as mock_generate_image:
+    with patch("Services.chatbot_service.ChatbotService.generate_image") as mock_generate_image:
         mock_generate_image.return_value = "mocked_base64_image_data"
 
         
@@ -33,7 +33,7 @@ def test_generate_image_image_success(client, api_keys_fixture):
     """Test /generateImage with valid API key and image type."""
 
     
-    with patch("chatbot.chatbot_service.ChatbotService.generate_image") as mock_generate_image:
+    with patch("Services.chatbot_service.ChatbotService.generate_image") as mock_generate_image:
         mock_generate_image.return_value = io.BytesIO(b"mocked_image_data")  
 
         
@@ -111,13 +111,8 @@ def test_generate_image_invalid_api_key(client, api_keys_fixture):
 def test_generate_image_validation_error(client, api_keys_fixture):
     """Test /generateImage with schema validation errors."""
 
-    
-
-
-    
     valid_api_key = client.get("/chatbot/generateApiKey").get_json()["api_key"]
 
-    
     response = client.post(
     "/chatbot/generateImage",
     json={"wrong_field": "invalid data"},  
@@ -135,7 +130,7 @@ def test_generate_image_unexpected_error(client, api_keys_fixture , caplog, caps
     """Test /generateImage with an unexpected error."""
 
     
-    with patch("chatbot.chatbot_service.ChatbotService.generate_image") as mock_generate_image:
+    with patch("Services.chatbot_service.ChatbotService.generate_image") as mock_generate_image:
         mock_generate_image.side_effect = Exception("Unexpected error")
 
         

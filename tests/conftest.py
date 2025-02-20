@@ -1,6 +1,6 @@
 import pytest
 from app import app
-from chatbot.chatbot_controller import api_keys
+from Controllers.chatbot_controller import api_keys
 
 @pytest.fixture
 def client(): # yield used here because it manages a context

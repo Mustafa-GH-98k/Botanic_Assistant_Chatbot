@@ -4,6 +4,9 @@ import time
 import streamlit as st
 import requests
 
+# This is the frontend for the botanic chatbot. It renders a chat interface,
+# posts user input to the chatbot api, and renders the response from the api.
+
 st.set_page_config(
     page_title="Botanic",  # Title displayed in the browser tab
     page_icon="💬",  # Icon displayed in the browser tab

@@ -1,12 +1,31 @@
 import os
 import requests
 
-from imgbb.imgbb_exceptions import ServiceException
+from Models.service_exception import ServiceException
 
 class ImgbbService:
     IMGBB_API_KEY = os.getenv("IMGBB_API_KEY") 
 
     def upload_to_imgbb(self , image_url):
+
+        """
+        Upload an image to imgbb.
+
+        Args:
+            image_url (str): The URL of the image.
+
+        Returns:
+            str: The URL of the uploaded image.
+
+        Raises:
+            ServiceException: If an exception occurs while fetching the image or uploading to imgbb.
+
+        Example:
+            imgbb_service = ImgbbService()
+            image_url = imgbb_service.upload_to_imgbb("https://example.com/image.jpg")
+            print(image_url)
+        """
+        
         url = "https://api.imgbb.com/1/upload"
         
         try:

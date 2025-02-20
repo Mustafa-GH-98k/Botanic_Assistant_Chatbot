@@ -4,26 +4,92 @@ import os
 from langchain_openai import ChatOpenAI
 from openai import OpenAI
 import requests
-from PIL import Image
 from io import BytesIO
 from google.cloud import firestore
 from langchain_google_firestore import FirestoreChatMessageHistory
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts import MessagesPlaceholder
 
-from chatbot.chatbot_agents import ChatbotAgentService
+from langgraph.prebuilt import create_react_agent
+from langchain.tools import StructuredTool
 
 
-from .chatbot_exceptions import ServiceException
+from Agents.image_generation_agent import ImageGenerationInput
+from Models.service_exception import ServiceException
+
+from Agents.image_generation_agent import image_generation_agent
+from Agents.image_analysis_agent import ImageAnalysisInput, image_analysis_agent
+
+
+from Models.service_exception import ServiceException
 
 class ChatbotService :
     client : OpenAI
     image_options = ["base64" , "image"]
 
     def __init__(self):
+        """
+        Initialize the chatbot service.
+
+        Raises:
+            Exception: If the OpenAI API key is not set.
+        """
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+
+    
+
+    def create_model_with_tools(self):
+        """
+        Create a model with tools.
+
+        Returns:
+            An instance of `ChatOpenAI` with the image generation and analysis tools.
+
+        Example:
+            >>> chatbot = ChatbotService()
+            >>> model = chatbot.create_model_with_tools()
+        """
+        # llm = ChatOpenAI(model="gpt-4-turbo")
+        llm = ChatOpenAI()
+
+
+        image_tool = StructuredTool.from_function(
+            func=image_generation_agent,
+            name="image_generator",
+            description="Generate an image from a given prompt using AI.",
+            args_schema=ImageGenerationInput
+        )
+
+        image_analysis_tool = StructuredTool.from_function(
+            func=image_analysis_agent,
+            args_schema=ImageAnalysisInput,
+            name="image_analyzer",
+            description="Analyze an image by providing both a prompt and an image URL." 
+        )
+
+        agent = create_react_agent(
+            model=llm, 
+            tools=[image_tool, image_analysis_tool]
+        )
+
+        return agent
+
     
     def generate_image(self, prompt: str, imageType: str):
+        """
+        Generate an image from a given prompt.
+
+        Args:
+            prompt (str): The prompt to generate the image from.
+            imageType (str): The type of image to generate. Can be "base64" or "image".
+
+        Returns:
+            str: The generated image as a base64 string or a url to the image.
+
+        Raises:
+            ServiceException: If the image type is not valid or if there is an error generating the image.
+            requests.RequestException: If there is an error fetching the generated image.
+        """
         if imageType not in self.image_options:
             raise ServiceException(f"Image Type must be one of: {', '.join(self.image_options)}", 400)
         
@@ -59,34 +125,55 @@ class ChatbotService :
 
 
     def chat(self, prompt: str , user_session_id:str):
-            if not prompt.strip():
-                raise ServiceException("Prompt cannot be empty.", 400)
+        """
+        Handle a chat request.
 
-            try:
-                client = firestore.Client(project=os.environ["FIREBASE_PROJECT_ID"])
-                history = FirestoreChatMessageHistory(
-                    session_id=user_session_id, collection=os.environ["FIREBASE_COLLECTION_NAME"], client=client
-                )
-                history.add_user_message(prompt)
+        Args:
+            prompt (str): The user's prompt.
+            user_session_id (str): The user's session ID.
 
-                agent_service = ChatbotAgentService()
-                llm = agent_service.create_model_with_tools()
-                prompt_template= generate_prompt_template(history)
+        Returns:
+            str: The chatbot's response.
 
-                chain = prompt_template | llm
-                response = chain.invoke({"messages":history.messages})
-                
-                llm_response = response['messages'][-1].content
+        Raises:
+            ServiceException: If there is an error in the chat process.
+        """
+        if not prompt.strip():
+            raise ServiceException("Prompt cannot be empty.", 400)
 
-                history.add_ai_message(llm_response)
+        try:
+            client = firestore.Client(project=os.environ["FIREBASE_PROJECT_ID"])
+            history = FirestoreChatMessageHistory(
+                session_id=user_session_id, collection=os.environ["FIREBASE_COLLECTION_NAME"], client=client
+            )
+            history.add_user_message(prompt)
 
-                return  llm_response
-            except Exception as e:
-                logging.exception("An unexpected error occurred")
-                raise ServiceException(f"Internal Server Error", 500) 
+            llm = self.create_model_with_tools()
+            prompt_template= generate_prompt_template(history)
+
+            chain = prompt_template | llm
+            response = chain.invoke({"messages":history.messages})
+            
+            llm_response = response['messages'][-1].content
+
+            history.add_ai_message(llm_response)
+
+            return  llm_response
+        except Exception as e:
+            logging.exception("An unexpected error occurred")
+            raise ServiceException(f"Internal Server Error", 500) 
 
 
 def generate_prompt_template(history):
+    """
+    Generate a prompt template for the chatbot.
+
+    Args:
+        history (list): The chat history.
+
+    Returns:
+        A `ChatPromptTemplate` instance.
+    """
     context = """
     You are a chatbot that helps users by providing information and generating images based on their requests. 
     You can generate images and provide relevant information about them. 
@@ -125,8 +212,7 @@ def generate_prompt_template(history):
         Input: Can you show the sunset image again?  
 
         Output: Here is the sunset image you requested: [https://example.com/generated-sunset.jpg].  
-"""
-
+    """
 
     instructions = """
     If the user asks for an image, return the image URL and a response strictly like this {{image_ur:"url" , response:"your text response here"}}. 
@@ -156,6 +242,7 @@ def generate_prompt_template(history):
 
 
 if __name__ == "__main__":
-    chatbot = ChatbotService()
-    r = chatbot.generate_image("beriut lebanon" , "base6")
-    print(r)
+    pass
+    # chatbot = ChatbotService()
+    # r = chatbot.generate_image("beriut lebanon" , "base6")
+    # print(r)
