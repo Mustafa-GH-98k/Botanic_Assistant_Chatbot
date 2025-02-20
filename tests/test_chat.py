@@ -22,7 +22,7 @@ def test_generate_api_key(client, api_keys_fixture):
 def test_chat_success(client, api_keys_fixture):
     """Test /chat with valid API key and valid request."""
 
-    with patch("chatbot.chatbot_service.ChatbotService.chat") as mock_generate_image:
+    with patch("Services.chatbot_service.ChatbotService.chat") as mock_generate_image:
         mock_generate_image.return_value = "mocked chatbot response"
 
         valid_api_key = client.get("/chatbot/generateApiKey").get_json()["api_key"]
@@ -83,7 +83,7 @@ def test_chat_internal_error(client, api_keys_fixture):
     headers = {"x-api-key": api_key}
     data = {"content": "Hello, chatbot!"}
 
-    with patch("chatbot.chatbot_service.ChatbotService.chat", side_effect=Exception("Chatbot failure")):
+    with patch("Services.chatbot_service.ChatbotService.chat", side_effect=Exception("Chatbot failure")):
         response = client.post("/chatbot/chat", json=data, headers=headers)
         response_data = response.get_json()
 
