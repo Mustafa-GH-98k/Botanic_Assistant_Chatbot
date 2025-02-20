@@ -6,7 +6,7 @@ import sys
 processes = []
 
 def run_flask():
-    gunicorn_process = subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "300", "app:app"])
+    gunicorn_process = subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "300", "--log-file", "-", "app:app"])
     processes.append(gunicorn_process)
     gunicorn_process.wait()
 
@@ -15,27 +15,41 @@ def run_streamlit():
     processes.append(streamlit_process)
     streamlit_process.wait()
 
-def cleanup_processes():
-    for process in processes:
-        if process.poll() is None:
-            process.terminate()
-            process.kill()
-
 def run_both_apps():
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.start()
-    run_streamlit()
-    flask_thread.join()
+    streamlit_thread = threading.Thread(target=run_streamlit)
+    streamlit_thread.start()
+    run_flask()
+    streamlit_thread.join()
 
-def handle_exit(sig, frame):
-    cleanup_processes()
-    sys.exit(0)
 
-signal.signal(signal.SIGINT, handle_exit)
+def kill_processes_on_port(port):
+    print(f"Attempting to kill processes running on port {port}...")
+    subprocess.run(["lsof", "-i", f":{port}", "-t"], stdout=subprocess.PIPE)
+    pids = subprocess.run(["lsof", "-i", f":{port}", "-t"], stdout=subprocess.PIPE).stdout.decode().splitlines()
+    print(f"Found the following processes: {pids}")
+    for pid in pids:
+        subprocess.run(["kill", pid])
+
+cleanup_called = False
+
+def cleanup(sig, frame):
+    global cleanup_called
+    if not cleanup_called:
+        cleanup_called = True
+        print("Cleaning up...")
+        kill_processes_on_port(5000)
+        print("Cleanup complete.")
+        sys.exit(0)
+    else:
+        print("Cleanup already in progress, ignoring subsequent signals.")
+
+
+
+
+def main():
+    signal.signal(signal.SIGINT, cleanup)
+    signal.signal(signal.SIGTERM, cleanup)  
+    run_both_apps()
 
 if __name__ == "__main__":
-    try:
-        run_both_apps()
-    except KeyboardInterrupt:
-        cleanup_processes()
-        sys.exit(0)
+    main()
