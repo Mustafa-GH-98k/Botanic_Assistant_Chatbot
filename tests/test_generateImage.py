@@ -111,13 +111,8 @@ def test_generate_image_invalid_api_key(client, api_keys_fixture):
 def test_generate_image_validation_error(client, api_keys_fixture):
     """Test /generateImage with schema validation errors."""
 
-    
-
-
-    
     valid_api_key = client.get("/chatbot/generateApiKey").get_json()["api_key"]
 
-    
     response = client.post(
     "/chatbot/generateImage",
     json={"wrong_field": "invalid data"},  

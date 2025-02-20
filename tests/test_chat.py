@@ -2,6 +2,8 @@ from unittest.mock import patch
 
 
 def test_hello_world(client):
+    """Test the root endpoint (/) to ensure it returns a 200 status code and the expected 'Hello, World!' response."""
+
     response = client.get('/')
     assert response.status_code == 200
     assert response.data == b'Hello, World!'
