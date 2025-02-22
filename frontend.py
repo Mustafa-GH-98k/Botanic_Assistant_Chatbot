@@ -7,6 +7,7 @@ import requests
 # This is the frontend for the botanic chatbot. It renders a chat interface,
 # posts user input to the chatbot api, and renders the response from the api.
 
+# STREAMLIT CONFIG
 st.set_page_config(
     page_title="Botanic",  # Title displayed in the browser tab
     page_icon="💬",  # Icon displayed in the browser tab
@@ -14,7 +15,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"  # Options: "auto", "expanded", or "collapsed"
 )
 
+st.title("Botanic")
 
+
+# CONSTANTS
 # ORIGIN="http://127.0.0.1:5000"
 ORIGIN = os.environ["FLASK_ORIGIN"]
 
@@ -23,6 +27,8 @@ headers = {
     "x-api-key": "test",
     "Content-Type": "application/json"
 }
+
+# UTILITIE FUNCTIONS 
 
 def is_valid_json(data):
     try:
@@ -68,12 +74,18 @@ def display_response(response:requests.Response):
 
 
 
+# STATE VARIABLES ----------------------------------------------------  
 
-st.title("Botanic")
+if "disabled" not in st.session_state:
+    st.session_state.disabled = False
+
+def disable():
+    st.session_state.disabled = True
 
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
 
 for message in st.session_state.messages :
     st.chat_message(message["role"]).markdown(message["content"])
@@ -81,16 +93,15 @@ for message in st.session_state.messages :
         st.image(message["image_url"], caption="Generated image")
 
 
-
-prompt = st.chat_input("Send a message")
-
-
-if prompt:
+if prompt := st.chat_input("Send a message" , disabled= st.session_state.disabled, key="prompt" , on_submit=disable):
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role":"user" , "content": prompt})
 
     response = call_llm_api(prompt)
     display_response(response)
+    
+    st.session_state.disabled = False
+    st.rerun()
 
 
 
