@@ -130,7 +130,7 @@ class ChatbotService :
 
         Args:
             prompt (str): The user's prompt.
-            user_session_id (str): The user's session ID.
+            user_session_id (str): The user's firestore document session ID.
 
         Returns:
             str: The chatbot's response.
