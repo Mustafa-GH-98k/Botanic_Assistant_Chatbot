@@ -6,7 +6,7 @@ import sys
 processes = []
 
 def run_flask():
-    gunicorn_process = subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "300", "--log-file", "-", "app:app"])
+    gunicorn_process = subprocess.Popen(["gunicorn", "-w", "1", "-b", "0.0.0.0:5000", "--timeout", "300", "--log-file", "-", "app:app"])
     processes.append(gunicorn_process)
     gunicorn_process.wait()
 
